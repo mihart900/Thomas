@@ -2,7 +2,8 @@
   "name": "Thomas Tracker",
   "short_name": "Tracker",
   "description": "Personal task management module — Thomas ecosystem",
-  "start_url": "/",
+  "start_url": "/Thomas/tracker/",
+  "scope": "/Thomas/tracker/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0d0d0f",
@@ -28,7 +29,7 @@
       "name": "Open Tasks",
       "short_name": "Tasks",
       "description": "View all open tasks",
-      "url": "/?filter=open"
+      "url": "/Thomas/tracker/?filter=open"
     }
   ]
 }
