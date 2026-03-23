@@ -567,9 +567,6 @@ function saveSettingsFromUI() {
   render();
 }
 
-let tasks = [];
-let filter = 'all';
-let workFlagOn = false;
 
 function loadTasks() {
   try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
