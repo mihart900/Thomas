@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Thomas Tracker">
+<meta name="theme-color" content="#0d0d0f">
+<meta name="description" content="Thomas Tracker — personal task management module">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Thomas Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8e6e0;
+    --muted: #6b6a66;
+    --accent: #c8a96e;
+    --accent-dim: rgba(200,169,110,0.12);
+    --accent-dim2: rgba(200,169,110,0.22);
+    --danger: #c06060;
+    --success: #5a9e7a;
+    --work: #6a8fc8;
+    --work-dim: rgba(106,143,200,0.13);
+    --font-mono: 'DM Mono', monospace;
+    --font-serif: 'Playfair Display', serif;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html { background: var(--bg); }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    min-height: 100vh;
+    max-width: 540px;
+    margin: 0 auto;
+    padding-top: var(--safe-top);
+    padding-bottom: calc(80px + var(--safe-bottom));
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    padding: 24px 20px 14px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    position: sticky;
+    top: var(--safe-top);
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .header-left { display: flex; align-items: baseline; gap: 10px; }
+
+  .header-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .header-module {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 2px 8px;
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+  }
+
+  .header-meta {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .stats-bar {
+    padding: 10px 20px;
+    display: flex;
+    gap: 18px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg);
+  }
+
+  .stat {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .stat span { color: var(--text); font-weight: 500; }
+
+  .add-zone {
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg);
+  }
+
+  .add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .add-input {
+    flex: 1;
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .add-input:focus { border-color: var(--accent); }
+  .add-input::placeholder { color: var(--muted); }
+
+  .add-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: #0d0d0f;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .add-btn:active { opacity: 0.75; }
+
+  .meta-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .priority-select {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 6px 10px;
+    outline: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .priority-select:focus { border-color: var(--accent); color: var(--text); }
+
+  .work-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .work-toggle.on { background: var(--work-dim); border-color: var(--work); }
+  .work-toggle-label {
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .work-toggle.on .work-toggle-label { color: var(--work); }
+  .work-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.15s;
+  }
+  .work-toggle.on .work-dot { background: var(--work); }
+
+  .filters {
+    display: flex;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 0.5px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--bg);
+  }
+  .filters::-webkit-scrollbar { display: none; }
+
+  .filter-btn {
+    background: none;
+    border: 0.5px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-btn:active { opacity: 0.7; }
+  .filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  .task-list { padding: 4px 0; }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.1s;
+  }
+  .task-item.done { opacity: 0.4; }
+
+  .task-check {
+    width: 18px; height: 18px;
+    border: 0.5px solid var(--border2);
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .task-item.done .task-check { background: var(--success); border-color: var(--success); }
+
+  .check-svg { display: none; width: 10px; height: 10px; }
+  .task-item.done .check-svg { display: block; }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-desc {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .task-item.done .task-desc { text-decoration: line-through; color: var(--muted); }
+
+  .task-badges {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .badge {
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .badge-high { background: rgba(192,96,96,0.14); color: var(--danger); }
+  .badge-medium { background: rgba(200,169,110,0.12); color: var(--accent); }
+  .badge-low { background: rgba(107,106,102,0.18); color: var(--muted); }
+  .badge-work { background: var(--work-dim); color: var(--work); }
+  .badge-sent { background: rgba(90,158,122,0.14); color: var(--success); }
+
+  .task-date {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .task-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .action-btn {
+    background: none;
+    border: 0.5px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 9px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-btn.send { border-color: rgba(106,143,200,0.4); color: var(--work); }
+  .action-btn.send:active { background: var(--work-dim); }
+  .action-btn.del:active { border-color: var(--danger); color: var(--danger); }
+
+  .empty-state {
+    padding: 56px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 18px;
+    border-radius: var(--radius-lg);
+    opacity: 0;
+    transition: all 0.2s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+    letter-spacing: 0.04em;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .settings-overlay.hidden { display: none; }
+
+  .settings-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .settings-title {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .settings-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  .settings-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .settings-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    margin-bottom: 18px;
+  }
+  .settings-input:focus { border-color: var(--accent); }
+  .settings-input::placeholder { color: var(--muted); }
+
+  .settings-actions { display: flex; gap: 10px; }
+
+  .settings-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .settings-btn.primary { background: var(--accent); border: none; color: #0d0d0f; font-weight: 500; }
+  .settings-btn.secondary { background: none; border: 0.5px solid var(--border2); color: var(--muted); }
+  .settings-btn:active { opacity: 0.75; }
+
+  .gear-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 2px 4px;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .gear-btn:active { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-title">Thomas</div>
+    <div class="header-module">Tracker</div>
+  </div>
+  <div class="header-meta" id="headerDate"></div>
+  <button class="gear-btn" id="gearBtn" aria-label="Settings">⚙</button>
+</header>
+
+<div class="stats-bar" id="statsBar"></div>
+
+<div class="add-zone">
+  <div class="add-row">
+    <input class="add-input" id="taskInput" type="text" placeholder="Add a task..." autocomplete="off" autocorrect="off" spellcheck="false" />
+    <button class="add-btn" id="addBtn" aria-label="Add task">+</button>
+  </div>
+  <div class="meta-row">
+    <select class="priority-select" id="prioritySelect" aria-label="Priority">
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+      <option value="low">Low</option>
+    </select>
+    <div class="work-toggle" id="workToggle" role="button" aria-label="Flag as work task">
+      <div class="work-dot"></div>
+      <span class="work-toggle-label">Work</span>
+    </div>
+  </div>
+</div>
+
+<div class="filters" role="tablist">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="open">Open</button>
+  <button class="filter-btn" data-filter="work">Work</button>
+  <button class="filter-btn" data-filter="high">High</button>
+  <button class="filter-btn" data-filter="done">Done</button>
+</div>
+
+<div class="task-list" id="taskList" role="list"></div>
+
+<div class="toast" id="toast"></div>
+
+<div class="settings-overlay hidden" id="settingsOverlay">
+  <div class="settings-card">
+    <div class="settings-title">Settings</div>
+    <div class="settings-sub" id="settingsSub">Enter your work email address. It stays on your device — never in the repo.</div>
+    <label class="settings-label" for="emailInput">Work email</label>
+    <input class="settings-input" id="emailInput" type="email" placeholder="you@yourorg.com" autocomplete="email" />
+    <div class="settings-actions">
+      <button class="settings-btn secondary hidden" id="settingsCancelBtn">Cancel</button>
+      <button class="settings-btn primary" id="settingsSaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'thomas_tracker_v1';
+const SETTINGS_KEY = 'thomas_tracker_settings_v1';
+
+let tasks = [];
+let filter = 'all';
+let workFlagOn = false;
+let settings = { workEmail: '' };
+
+function loadSettings() {
+  try { settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || { workEmail: '' }; }
+  catch { settings = { workEmail: '' }; }
+}
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function getWorkEmail() { return settings.workEmail || ''; }
+
+function openSettings(isFirstRun = false) {
+  const overlay = document.getElementById('settingsOverlay');
+  const cancelBtn = document.getElementById('settingsCancelBtn');
+  const sub = document.getElementById('settingsSub');
+  document.getElementById('emailInput').value = settings.workEmail || '';
+  if (isFirstRun) {
+    sub.textContent = 'One-time setup. Enter your work email to enable task routing. Stored on your device only — never in the repo.';
+    cancelBtn.classList.add('hidden');
+  } else {
+    sub.textContent = 'Your work email for task routing. Stored on your device only.';
+    cancelBtn.classList.remove('hidden');
+  }
+  overlay.classList.remove('hidden');
+  setTimeout(() => document.getElementById('emailInput').focus(), 100);
+}
+
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.add('hidden');
+}
+
+function saveSettingsFromUI() {
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('emailInput').focus();
+    showToast('Enter a valid email');
+    return;
+  }
+  settings.workEmail = email;
+  saveSettings();
+  closeSettings();
+  showToast('Settings saved');
+  render();
+}
+
+let tasks = [];
+let filter = 'all';
+let workFlagOn = false;
+
+function loadTasks() {
+  try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { tasks = []; }
+}
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function uuid() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function setHeaderDate() {
+  document.getElementById('headerDate').textContent =
+    new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function addTask() {
+  const input = document.getElementById('taskInput');
+  const desc = input.value.trim();
+  if (!desc) { input.focus(); return; }
+  const priority = document.getElementById('prioritySelect').value;
+  tasks.unshift({
+    id: uuid(),
+    description: desc,
+    created: new Date().toISOString(),
+    priority,
+    workFlag: workFlagOn,
+    workSent: false,
+    telegramSynced: false,
+    tags: [],
+    status: 'open'
+  });
+  saveTasks();
+  input.value = '';
+  workFlagOn = false;
+  updateWorkToggle();
+  render();
+  showToast('Task added');
+}
+
+function toggleDone(id) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  t.status = t.status === 'done' ? 'open' : 'done';
+  if (t.status === 'done') t.completed = new Date().toISOString();
+  saveTasks();
+  render();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  render();
+  showToast('Task removed');
+}
+
+function sendToWork(id) {
+  const workEmail = getWorkEmail();
+  if (!workEmail) { openSettings(false); showToast('Set work email first'); return; }
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  const subject = encodeURIComponent('[Thomas Tracker] ' + t.description);
+  const body = encodeURIComponent(
+    'Task: ' + t.description + '\n' +
+    'Priority: ' + t.priority.toUpperCase() + '\n' +
+    'Created: ' + formatDate(t.created) + '\n\n' +
+    '— Sent from Thomas Tracker'
+  );
+  window.location.href = 'mailto:' + workEmail + '?subject=' + subject + '&body=' + body;
+  t.workSent = true;
+  saveTasks();
+  render();
+  showToast('Opening mail client');
+}
+
+function filteredTasks() {
+  return tasks.filter(t => {
+    if (filter === 'all') return true;
+    if (filter === 'open') return t.status === 'open';
+    if (filter === 'done') return t.status === 'done';
+    if (filter === 'work') return t.workFlag;
+    if (filter === 'high') return t.priority === 'high';
+    return true;
+  });
+}
+
+function updateWorkToggle() {
+  document.getElementById('workToggle').classList.toggle('on', workFlagOn);
+}
+
+function renderStats() {
+  const open = tasks.filter(t => t.status === 'open').length;
+  const work = tasks.filter(t => t.workFlag && t.status === 'open').length;
+  const high = tasks.filter(t => t.priority === 'high' && t.status === 'open').length;
+  document.getElementById('statsBar').innerHTML =
+    `<div class="stat"><span>${open}</span> open</div>` +
+    `<div class="stat"><span>${work}</span> work</div>` +
+    `<div class="stat"><span>${high}</span> high</div>`;
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function checkSVG() {
+  return `<svg class="check-svg" viewBox="0 0 10 10" fill="none">
+    <polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#0d0d0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function render() {
+  renderStats();
+  const list = document.getElementById('taskList');
+  const visible = filteredTasks();
+
+  if (!visible.length) {
+    list.innerHTML = '<div class="empty-state">No tasks here</div>';
+    return;
+  }
+
+  list.innerHTML = visible.map(t => {
+    const done = t.status === 'done';
+    const badges = [];
+    if (t.priority !== 'medium') badges.push(`<span class="badge badge-${t.priority}">${t.priority}</span>`);
+    if (t.workFlag) badges.push(`<span class="badge badge-work">Work</span>`);
+    if (t.workSent) badges.push(`<span class="badge badge-sent">Sent</span>`);
+
+    const sendBtn = (t.workFlag && !t.workSent && !done)
+      ? `<button class="action-btn send" onclick="sendToWork('${t.id}')">Send</button>` : '';
+
+    return `<div class="task-item${done ? ' done' : ''}" role="listitem">
+      <div class="task-check" onclick="toggleDone('${t.id}')" role="checkbox" aria-checked="${done}" tabindex="0">${checkSVG()}</div>
+      <div class="task-body">
+        <div class="task-desc">${esc(t.description)}</div>
+        <div class="task-badges">
+          ${badges.join('')}
+          <span class="task-date">${formatDate(t.created)}</span>
+        </div>
+      </div>
+      <div class="task-actions">
+        ${sendBtn}
+        <button class="action-btn del" onclick="deleteTask('${t.id}')">Del</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('addBtn').addEventListener('click', addTask);
+document.getElementById('taskInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+document.getElementById('workToggle').addEventListener('click', () => {
+  workFlagOn = !workFlagOn;
+  updateWorkToggle();
+});
+document.getElementById('gearBtn').addEventListener('click', () => openSettings(false));
+document.getElementById('settingsSaveBtn').addEventListener('click', saveSettingsFromUI);
+document.getElementById('settingsCancelBtn').addEventListener('click', closeSettings);
+document.getElementById('emailInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveSettingsFromUI();
+  if (e.key === 'Escape') closeSettings();
+});
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filter = btn.dataset.filter;
+    render();
+  });
+});
+
+setHeaderDate();
+loadSettings();
+loadTasks();
+render();
+if (!settings.workEmail) openSettings(true);
+</script>
+</body>
+</html>
