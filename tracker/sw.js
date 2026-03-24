@@ -1,8 +1,8 @@
 const CACHE_NAME = 'thomas-tracker-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  '/Thomas/',
+  '/Thomas/index.html',
+  '/Thomas/manifest.json'
 ];
 
 self.addEventListener('install', event => {
